@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common'; // 編集！
 import { ItemService } from './item.service'; // 追記！
 import { Item } from '../entities/item.entity'; // 追記！
-import { CreateItemDTO } from './item.dto'; // 追記！
+import { CreateItemDTO, UpdateItemDTO } from './item.dto'; // 追記！
 import { InsertResult, UpdateResult, DeleteResult } from 'typeorm'; // 追記！
 
 @Controller('item')
@@ -33,5 +33,20 @@ export class ItemController {
   @Get(':id')
   async getItem(@Param('id') id: string): Promise<Item> {
     return await this.service.find(Number(id));
+  }
+
+  // `item/id番号/update`のURIにPUTメソッドで指定したデータの更新を実行．
+  @Put(':id/update')
+  async update(
+    @Param('id') id: string,
+    @Body() itemData: UpdateItemDTO,
+  ): Promise<UpdateResult> {
+    const newData = !itemData.isDone
+      ? itemData
+      : {
+          ...itemData,
+          ...{ isDone: itemData.isDone.toLowerCase() === 'true' },
+        };
+    return await this.service.update(Number(id), newData);
   }
 }
