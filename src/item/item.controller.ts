@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common'; // 編集！
 import { ItemService } from './item.service'; // 追記！
 import { Item } from '../entities/item.entity'; // 追記！
-import { CreateItemDTO, UpdateItemDTO } from './item.dto'; // 追記！
+import { CreateItemDTO, UpdateItemDTO, DeleteItemDTO } from './item.dto'; // 追記！
 import { InsertResult, UpdateResult, DeleteResult } from 'typeorm'; // 追記！
 
 @Controller('item')
@@ -48,5 +48,20 @@ export class ItemController {
           ...{ isDone: itemData.isDone.toLowerCase() === 'true' },
         };
     return await this.service.update(Number(id), newData);
+  }
+
+  // パスワードなしで即削除する処理（動作確認用）
+  @Delete(':id/delete')
+  async delete(@Param('id') id: string): Promise<DeleteResult> {
+    return await this.service.delete(Number(id));
+  }
+
+  // POSTメソッドでパスワードを送信して削除する処理
+  @Post(':id/delete')
+  async deleteItem(@Param('id') id: string, @Body() deleteItem: DeleteItemDTO) {
+    return await this.service.deleteByPassword(
+      Number(id),
+      deleteItem.deletePassword,
+    );
   }
 }
